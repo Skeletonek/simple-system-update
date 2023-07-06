@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#	 Copyright (C) 2022 Skeletonek
+#	 Copyright (C) 2022-2023 Skeletonek
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -18,39 +18,47 @@
 #    Contact: skeleton0199@gmail.com
 
 if [[ $1 = "-h" ]] ; then
-cat << EOF
+    cat << EOF
 Script to update your system automaticly
+After update this script will shutdown your PC or restart it if you used -r parameter
 
-Syntax: ssu [-h/s/r/v]
+If snapper is detected, it will also create a snapshot of your system
+
+Syntax: ssu [-b/-br/-c/-h/-r/-v] (Please use only one argument)
 Options:
+  -b    Don't create a filesystem snapshot / Don't use snapper
+  -br   Don't create a filesystem snapshot and restart the system
   -h    Shows this help
-  -s    Shutdowns system after update
   -r    Restarts system after update
   -v    Shows version info
 EOF
+
 elif [[ $1 = "-v" ]] ; then
-cat << EOF
+    cat << EOF
 Simple System Update
-Version: 1.0.0
+Version: 1.1.0
 Author: Skeletonek
 
-Copyright (C) 2022 Skeletonek
+Copyright (C) 2022-2023 Skeletonek
 Licensed under GNU GPLv3
 EOF
+
 else
+    if [[ $1 != "-b" || $1 != "-br" ]] ; then
+        sudo snapper create -d "ssu update"
+    fi
+
     #    Updating system
     type dnf &>/dev/null && sudo dnf update -y
-    type apt &>/dev/null && sudo apt upgrade -y
+    type apt &>/dev/null && sudo apt update && sudo apt upgrade -y
     type pacman &>/dev/null && sudo pacman -Syu
     type flatpak &>/dev/null && flatpak update -y
     type snap &>/dev/null && sudo snap update -y
 
     #    Turning off system
-    if [[ $1 = "-r" ]] ; then
+    if [[ $1 = "-r" || $1 = "-br" ]] ; then
         qdbus org.kde.Shutdown /Shutdown logoutAndReboot || dbus-send --system --print-reply --dest=org.freedesktop.login1 /org/freedesktop/login1 "org.freedesktop.login1.Manager.Reboot" boolean:true
-    elif [[ $1 = "-s" ]] ; then
-        qdbus org.kde.Shutdown /Shutdown logoutAndShutdown || dbus-send --system --print-reply --dest=org.freedesktop.login1 /org/freedesktop/login1 "org.freedesktop.login1.Manager.PowerOff" boolean:true
-    elif [[ $1 = "" ]] ; then
+    else
         qdbus org.kde.Shutdown /Shutdown logoutAndShutdown || dbus-send --system --print-reply --dest=org.freedesktop.login1 /org/freedesktop/login1 "org.freedesktop.login1.Manager.PowerOff" boolean:true
     fi
 fi
