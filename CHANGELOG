@@ -1,3 +1,7 @@
+1.1.1
+ - Changed snapper snapshot type to pre-post
+ - Fix errors for PC without snapper
+
 1.1.0
  - Added support for creating automatic snapshots with snapper
  - Fix not fetching packages with APT

@@ -36,7 +36,7 @@ EOF
 elif [[ $1 = "-v" ]] ; then
     cat << EOF
 Simple System Update
-Version: 1.1.0
+Version: 1.1.1
 Author: Skeletonek
 
 Copyright (C) 2022-2023 Skeletonek
@@ -44,8 +44,9 @@ Licensed under GNU GPLv3
 EOF
 
 else
+    #    Creating pre-snapshot
     if [[ $1 != "-b" || $1 != "-br" ]] ; then
-        sudo snapper create -d "ssu update"
+        type snapper &>/dev/null && pre=$(sudo snapper create -d "ssu update" -t pre -p)
     fi
 
     #    Updating system
@@ -54,6 +55,11 @@ else
     type pacman &>/dev/null && sudo pacman -Syu
     type flatpak &>/dev/null && flatpak update -y
     type snap &>/dev/null && sudo snap update -y
+
+    #    Creating post-snaphost
+    if [[ $1 != "-b" || $1 != "-br" ]] ; then
+        type snapper &>/dev/null && sudo snapper create -d "ssu update" -t post --pre-number $pre
+    fi
 
     #    Turning off system
     if [[ $1 = "-r" || $1 = "-br" ]] ; then
