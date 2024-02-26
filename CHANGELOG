@@ -1,3 +1,10 @@
+1.2.0
+ - Updated help view
+ - Improved flags handling
+ - Snapper snapshots are now disabled by default (Enable them with -b flag)
+ - Prioritize DNF5 over DNF4
+ - Error out when script is not run as sudo
+
 1.1.1
  - Changed snapper snapshot type to pre-post
  - Fix errors for PC without snapper

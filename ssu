@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#	 Copyright (C) 2022-2023 Skeletonek
+#	 Copyright (C) 2022-2024 Skeletonek
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -17,54 +17,95 @@
 #
 #    Contact: skeleton0199@gmail.com
 
-if [[ $1 = "-h" ]] ; then
+arg_help=0;
+arg_snapper=0;
+arg_reboot=0;
+arg_version=0;
+
+while getopts brhv arg
+do
+    case "${arg}" in
+        b) arg_snapper=1;;
+        r) arg_reboot=1;;
+        h) arg_help=1;;
+        v) arg_version=1;;
+    esac
+done
+
+
+if [[ $arg_help = 1 ]] ; then
     cat << EOF
-Script to update your system automaticly
-After update this script will shutdown your PC or restart it if you used -r parameter
+The script need to be run as root.
 
-If snapper is detected, it will also create a snapshot of your system
+Script to update your system automaticly.
+After update, this script will shutdown your PC or restart it if you used -r parameter.
 
-Syntax: ssu [-b/-br/-c/-h/-r/-v] (Please use only one argument)
+Syntax: ssu [-b/-h/-r/-v] (Please use only one argument)
 Options:
-  -b    Don't create a filesystem snapshot / Don't use snapper
-  -br   Don't create a filesystem snapshot and restart the system
-  -h    Shows this help
-  -r    Restarts system after update
-  -v    Shows version info
-EOF
+-b    Create a filesystem snapshot with snapper (Requires snapper to be installed)
+-h    Shows this help
+-r    Restarts system after update
+-v    Shows version info
 
-elif [[ $1 = "-v" ]] ; then
+Examples:
+ssu -br
+ssu -h
+EOF
+    exit 0
+fi
+
+
+if [[ $arg_version = 1 ]] ; then
     cat << EOF
 Simple System Update
-Version: 1.1.1
+Version: 1.2.0
 Author: Skeletonek
 
-Copyright (C) 2022-2023 Skeletonek
+Copyright (C) 2022-2024 Skeletonek
 Licensed under GNU GPLv3
 EOF
-
-else
-    #    Creating pre-snapshot
-    if [[ $1 != "-b" || $1 != "-br" ]] ; then
-        type snapper &>/dev/null && pre=$(sudo snapper create -d "ssu update" -t pre -p)
-    fi
-
-    #    Updating system
-    type dnf &>/dev/null && sudo dnf update -y
-    type apt &>/dev/null && sudo apt update && sudo apt upgrade -y
-    type pacman &>/dev/null && sudo pacman -Syu
-    type flatpak &>/dev/null && flatpak update -y
-    type snap &>/dev/null && sudo snap update -y
-
-    #    Creating post-snaphost
-    if [[ $1 != "-b" || $1 != "-br" ]] ; then
-        type snapper &>/dev/null && sudo snapper create -d "ssu update" -t post --pre-number $pre
-    fi
-
-    #    Turning off system
-    if [[ $1 = "-r" || $1 = "-br" ]] ; then
-        qdbus org.kde.Shutdown /Shutdown logoutAndReboot || dbus-send --system --print-reply --dest=org.freedesktop.login1 /org/freedesktop/login1 "org.freedesktop.login1.Manager.Reboot" boolean:true
-    else
-        qdbus org.kde.Shutdown /Shutdown logoutAndShutdown || dbus-send --system --print-reply --dest=org.freedesktop.login1 /org/freedesktop/login1 "org.freedesktop.login1.Manager.PowerOff" boolean:true
-    fi
+    exit 0
 fi
+
+if ! [ $(id -u) = 0 ]; then
+   echo "The script need to be run as root." >&2
+   exit 1
+fi
+
+
+
+#    Creating pre-snapshot
+if [[ $arg_snapper = 1 ]] ; then
+    type snapper &>/dev/null && pre=$(snapper create -d "ssu update" -t pre -p)
+fi
+
+#    Updating system
+# Prioritize DNF5 over DNF4
+if [[ $(type dnf5) != 0 ]]; then
+    dnf5 update -y;
+else
+    type dnf &>/dev/null && dnf update -y;
+fi
+type apt &>/dev/null && apt update && apt upgrade -y;
+type pacman &>/dev/null && pacman -Syu;
+type flatpak &>/dev/null && sudo -u \#1000 flatpak update -y; #FIXME: Not a greatest solution for multi-user systems
+type snap &>/dev/null && snap update -y;
+# type zypper &>/dev/null && zypper up;
+
+# OpenSuse's zypper is kinda problematic for this script to support
+# Read here why: https://unix.stackexchange.com/a/18598
+# If you want to have zypper support, uncomment the line starting with 'type zypper'
+# and adjust the command to OpenSuse Leap or Tumbleweed
+
+#    Creating post-snaphost
+if [[ $arg_snapper = 1 ]] ; then
+    type snapper &>/dev/null && snapper create -d "ssu update" -t post --pre-number $pre
+fi
+
+#    Turning off system
+if [[ $arg_reboot = 1 ]] ; then
+    qdbus org.kde.Shutdown /Shutdown logoutAndReboot || dbus-send --system --print-reply --dest=org.freedesktop.login1 /org/freedesktop/login1 "org.freedesktop.login1.Manager.Reboot" boolean:true
+else
+    qdbus org.kde.Shutdown /Shutdown logoutAndShutdown || dbus-send --system --print-reply --dest=org.freedesktop.login1 /org/freedesktop/login1 "org.freedesktop.login1.Manager.PowerOff" boolean:true
+fi
+
