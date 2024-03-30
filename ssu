@@ -40,7 +40,7 @@ The script need to be run as root.
 Script to update your system automaticly.
 After update, this script will shutdown your PC or restart it if you used -r parameter.
 
-Syntax: ssu [-b/-h/-r/-v] (Please use only one argument)
+Syntax: ssu [-b/-h/-r/-v]
 Options:
 -b    Create a filesystem snapshot with snapper (Requires snapper to be installed)
 -h    Shows this help
@@ -58,7 +58,7 @@ fi
 if [[ $arg_version = 1 ]] ; then
     cat << EOF
 Simple System Update
-Version: 1.2.0
+Version: 1.2.1
 Author: Skeletonek
 
 Copyright (C) 2022-2024 Skeletonek
