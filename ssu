@@ -104,8 +104,8 @@ fi
 
 #    Turning off system
 if [[ $arg_reboot = 1 ]] ; then
-    qdbus org.kde.Shutdown /Shutdown logoutAndReboot || dbus-send --system --print-reply --dest=org.freedesktop.login1 /org/freedesktop/login1 "org.freedesktop.login1.Manager.Reboot" boolean:true
+    qdbus org.kde.Shutdown /Shutdown org.kde.Shutdown.logoutAndReboot || dbus-send --system --print-reply --dest=org.freedesktop.login1 /org/freedesktop/login1 "org.freedesktop.login1.Manager.Reboot" boolean:true
 else
-    qdbus org.kde.Shutdown /Shutdown logoutAndShutdown || dbus-send --system --print-reply --dest=org.freedesktop.login1 /org/freedesktop/login1 "org.freedesktop.login1.Manager.PowerOff" boolean:true
+    qdbus org.kde.Shutdown /Shutdown org.kde.Shutdown.logoutAndShutdown || dbus-send --system --print-reply --dest=org.freedesktop.login1 /org/freedesktop/login1 "org.freedesktop.login1.Manager.PowerOff" boolean:true
 fi
 
