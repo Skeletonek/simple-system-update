@@ -1,3 +1,7 @@
+1.2.1
+ - Fixed not shuting down or rebooting under KDE Plasma 6
+ - Fixed wrong information in help view
+
 1.2.0
  - Updated help view
  - Improved flags handling
