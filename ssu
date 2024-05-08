@@ -80,16 +80,17 @@ if [[ $arg_snapper = 1 ]] ; then
 fi
 
 #    Updating system
+type flatpak &>/dev/null && sudo -u \#1000 flatpak update -y; #FIXME: Not a greatest solution for multi-user systems
+type snap &>/dev/null && snap update -y;
+type apt &>/dev/null && apt update && apt upgrade -y;
 # Prioritize DNF5 over DNF4
 if [[ $(type dnf5) != 0 ]]; then
     dnf5 update -y;
 else
     type dnf &>/dev/null && dnf update -y;
 fi
-type apt &>/dev/null && apt update && apt upgrade -y;
 type pacman &>/dev/null && pacman -Syu;
-type flatpak &>/dev/null && sudo -u \#1000 flatpak update -y; #FIXME: Not a greatest solution for multi-user systems
-type snap &>/dev/null && snap update -y;
+type rpm-ostree &>/dev/null && rpm-ostree update 
 # type zypper &>/dev/null && zypper up;
 
 # OpenSuse's zypper is kinda problematic for this script to support
