@@ -59,7 +59,7 @@ fi
 if [[ $arg_version = 1 ]] ; then
     cat << EOF
 Simple System Update
-Version: 1.2.1
+Version: 1.3.0
 Author: Skeletonek
 
 Copyright (C) 2022-2024 Skeletonek
