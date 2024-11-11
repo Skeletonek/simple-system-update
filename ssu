@@ -91,12 +91,13 @@ else
 fi
 type pacman &>/dev/null && pacman -Syu;
 type rpm-ostree &>/dev/null && rpm-ostree update 
-# type zypper &>/dev/null && zypper up;
-
-# OpenSuse's zypper is kinda problematic for this script to support
-# Read here why: https://unix.stackexchange.com/a/18598
-# If you want to have zypper support, uncomment the line starting with 'type zypper'
-# and adjust the command to OpenSuse Leap or Tumbleweed
+if [[ $(type zypper &>/dev/null ) != 0 ]]; then
+    if [[ $(zypper tos) == *"Tumbleweed"* ]]; then
+        zypper dup -y;
+    else
+        zypper up -y;
+    fi
+fi
 
 #    Creating post-snaphost
 if [[ $arg_snapper = 1 ]] ; then
@@ -112,7 +113,7 @@ fi
 
 # These somehow don't work when run from this script
 # But executing them from a terminal works just fine
-# Leaving them here for supposed future use
+# Leaving them here for supposed future use with KDE desktop
 
 # qdbus org.kde.Shutdown /Shutdown org.kde.Shutdown.logoutAndReboot
 # qdbus org.kde.Shutdown /Shutdown org.kde.Shutdown.logoutAndShutdown
