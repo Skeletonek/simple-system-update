@@ -15,7 +15,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-#    Contact: skeleton0199@gmail.com
+#    Contact: contact@skeletonek.com
 
 arg_help=0;
 arg_snapper=0;
@@ -27,8 +27,9 @@ do
     case "${arg}" in
         b) arg_snapper=1;;
         r) arg_reboot=1;;
-        h) arg_help=1;;
         v) arg_version=1;;
+        h) arg_help=1;;
+        *) arg_help=1;;
     esac
 done
 
