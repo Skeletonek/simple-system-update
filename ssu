@@ -90,7 +90,7 @@ if [[ $(type dnf5) != 0 ]]; then
 else
     type dnf &>/dev/null && dnf update -y;
 fi
-type pacman &>/dev/null && pacman -Syu;
+type pacman &>/dev/null && pacman -Syu --noconfirm;
 type rpm-ostree &>/dev/null && rpm-ostree update 
 if [[ $(type zypper &>/dev/null ) != 0 ]]; then
     if [[ $(zypper tos) == *"Tumbleweed"* ]]; then
